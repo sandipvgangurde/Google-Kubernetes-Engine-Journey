@@ -180,9 +180,48 @@ kubectl config view
 
 ### **Step-08: Upload Sample App to CloudShell**
 
+- Folder: kube-manifests/01-kubernetes-deployment.yaml
+```
+apiVersion: apps/v1
+kind: Deployment 
+metadata: #Dictionary
+  name: myapp1-deployment
+spec: # Dictionary
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp1
+  template:  
+    metadata: # Dictionary
+      name: myapp1-pod
+      labels: # Dictionary
+        app: myapp1  # Key value pairs
+    spec:
+      containers: # List
+        - name: myapp1-container
+          image: stacksimplify/kubenginx:1.0.0
+          ports: 
+            - containerPort: 80  
+    
+```
+- Folder: kube-manifests/02-kubernetes-loadbalancer-service.yaml
 ```t
-# Upload Folder -> google-kubernetes-engine
-cd google-kubernetes-engine/02-Create-GKE-Cluster
+apiVersion: v1
+kind: Service 
+metadata:
+  name: myapp1-lb-service
+spec:
+  type: LoadBalancer # ClusterIp, # NodePort
+  selector:
+    app: myapp1
+  ports: 
+    - name: http
+      port: 80 # Service Port
+      targetPort: 80 # Container Port
+```
+
+```t
+
 ls kube-manifests/
 cat kube-manifests/01-kubernetes-deployment.yaml
 cat kube-manifests/02-kubernetes-loadbalancer-service.yaml
