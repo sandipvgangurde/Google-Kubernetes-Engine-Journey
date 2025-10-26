@@ -2,6 +2,11 @@
 
 ### **Description:** Learn to create Google Kubernetes Engine (GKE) Cluster, deploy a sample application, test, and clean up resources.
 
+
+
+<img width="1911" height="864" alt="image" src="https://github.com/user-attachments/assets/0cd05913-9523-409e-b5d0-310fd4415baa" />
+
+
 ---
 
 ## 🗂️ **Process Overview**
