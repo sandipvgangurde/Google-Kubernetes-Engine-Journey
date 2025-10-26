@@ -122,18 +122,49 @@ GKE Cluster Setup SOP
 #### Commands:
 
 ```t
-gke-gcloud-auth-plugin --version
+# Verify gke-gcloud-auth-plugin Installation (if not installed, install it)
+gke-gcloud-auth-plugin --version 
+
+# Install Kubectl authentication plugin for GKE
 sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
-gke-gcloud-auth-plugin --version
-gcloud container clusters get-credentials standard-public-cluster-1 --region us-central1 --project kdaida123
+
+# Verify gke-gcloud-auth-plugin Installation
+gke-gcloud-auth-plugin --version 
+
+# Configure kubeconfig for kubectl
+gcloud container clusters get-credentials <CLUSTER-NAME> --region <REGION> --project <PROJECT-NAME>
+gcloud container clusters get-credentials standard-public-cluster-1 --region us-central1 --project *****
+
+
+# Run kubectl with the new plugin prior to the release of v1.25
 vi ~/.bashrc
 USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+# Reload the environment value
 source ~/.bashrc
+
+# Check if Environment variable loaded in Terminal
 echo $USE_GKE_GCLOUD_AUTH_PLUGIN
+
+# Verify kubectl version
 kubectl version --short
+
+# Install kubectl (if not installed)
 gcloud components install kubectl
+
+# Configure kubectl
+gcloud container clusters get-credentials <CLUSTER-NAME> --zone <ZONE> --project <PROJECT-ID>
+gcloud container clusters get-credentials standard-cluster-1 --zone us-central1-c --project kdaida123
+
+# Verify Kubernetes Worker Nodes
 kubectl get nodes
+
+# Verify System Pod in kube-system Namespace
 kubectl -n kube-system get pods
+
+# Verify kubeconfig file
+cat $HOME/.kube/config
+kubectl config view
 ```
 
 ---
@@ -156,21 +187,91 @@ ls kube-manifests/
 cat kube-manifests/01-kubernetes-deployment.yaml
 cat kube-manifests/02-kubernetes-loadbalancer-service.yaml
 ```
-
 ---
 
 ### **Step-09: Deploy Sample Application**
 
-```t
-kubectl apply -f kube-manifests/
-kubectl get deploy
-kubectl get pod
-kubectl get svc
-# Access Application via:
-http://<EXTERNAL-IP>
+#### **Commands Executed:**
+
+```bash
+<GENERIC-USER>@cloudshell:~/gke-handon$ kubectl apply -f kube-manifests/
+deployment.apps/myapp1-deployment created
+service/myapp1-lb-service created
 ```
 
+✅ **Result:**
+Deployment and Service created successfully.
+
 ---
+
+### **Verify Deployment**
+
+```bash
+<GENERIC-USER>@cloudshell:~/gke-handon$ kubectl get deploy
+NAME                READY   UP-TO-DATE   AVAILABLE   AGE
+myapp1-deployment   2/2     2            2           22s
+```
+
+✅ **Result:**
+Deployment is up with 2 replicas running successfully.
+
+---
+
+### **Verify Service**
+
+```bash
+<GENERIC-USER>@cloudshell:~/gke-handon$ kubectl get svc
+NAME                TYPE           CLUSTER-IP         EXTERNAL-IP        PORT(S)        AGE
+kubernetes          ClusterIP      <GENERIC-CLUSTER-IP>   <none>         443/TCP        4h40m
+myapp1-lb-service   LoadBalancer   <GENERIC-CLUSTER-IP>   <GENERIC-EXTERNAL-IP>   80:32062/TCP   36s
+```
+
+✅ **Result:**
+LoadBalancer assigned an **external IP** successfully — app accessible via `http://<GENERIC-EXTERNAL-IP>`.
+
+---
+
+### **Verify Pods**
+
+```bash
+<GENERIC-USER>@cloudshell:~/gke-handon$ kubectl get pods
+NAME                                 READY   STATUS    RESTARTS   AGE
+myapp1-deployment-556b469d69-cswk9   1/1     Running   0          3m3s
+myapp1-deployment-556b469d69-tvn2j   1/1     Running   0          3m3s
+```
+
+✅ **Result:**
+Two pods created and running without restarts.
+
+---
+
+### **Step-14: Clean-Up**
+
+```bash
+<GENERIC-USER>@cloudshell:~/gke-handon$ kubectl delete -f kube-manifests/
+deployment.apps "myapp1-deployment" deleted
+service "myapp1-lb-service" deleted
+```
+
+✅ **Result:**
+All deployed resources deleted successfully.
+
+---
+
+### **Post-Cleanup Verification**
+
+```bash
+<GENERIC-USER>@cloudshell:~/gke-handon$ kubectl get deploy
+No resources found in default namespace.
+
+<GENERIC-USER>@cloudshell:~/gke-handon$ kubectl get svc
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   <GENERIC-CLUSTER-IP>   <none>   443/TCP   4h40m
+```
+
+✅ **Result:**
+Only default Kubernetes service remains — environment cleaned up.
+
 
 ### **Step-10 to Step-13: Verify in GKE Dashboard**
 
@@ -221,4 +322,3 @@ H --> I[End]
 
 ---
 
-Would you like me to include this SOP in a **Word or PDF format** (with charts and diagrams embedded)?
